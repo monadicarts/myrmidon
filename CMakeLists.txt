@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 # Define the project name, version (optional), and language
-project(RuleEngine VERSION 1.0 LANGUAGES CXX)
+project(Myrmidon VERSION 1.0 LANGUAGES CXX) # <--- CHANGED
 
 # --- Set C++ Standard (Globally or Per-Target) ---
 # Require C++17
@@ -20,16 +20,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Explicitly list files for robustness instead of using GLOB
 set(ENGINE_SOURCES
     src/base_fact.cpp
-    # src/pattern.cpp       # Assuming these exist or will be added
+    # src/pattern.cpp
     # src/constraint.cpp
     # src/rule.cpp
     # src/lhs_tree_node.cpp
     # Add other .cpp files belonging to the core engine here
-    # e.g., src/leap_network.cpp (when implemented)
 )
 
 # Create the static or shared library for the rule engine core
-# Choose STATIC or SHARED based on your needs. STATIC is often simpler initially.
+# (Target name RuleEngineCore is okay, or change to MyrmidonCore if preferred)
 add_library(RuleEngineCore STATIC ${ENGINE_SOURCES}) # Or SHARED
 
 # Tell CMake where to find header files for the RuleEngineCore library
@@ -47,7 +46,7 @@ target_include_directories(RuleEngineCore
 # --- Define Example Executable Using the Engine ---
 
 # Create an executable (e.g., for testing, examples, or the main application)
-# Ensure you have a src/main.cpp or remove/comment this section if not needed yet
+# (Target name RuleEngineApp is okay, or change to MyrmidonApp if preferred)
 add_executable(RuleEngineApp src/main.cpp)
 
 # Link the executable against the core engine library
@@ -63,16 +62,13 @@ target_link_libraries(RuleEngineApp PRIVATE RuleEngineCore)
 enable_testing()
 
 # Find the GoogleTest package
-# Note: This requires GoogleTest to be installed on your system or discoverable
-# by CMake (e.g., via CMAKE_PREFIX_PATH). Alternatively, you could use
-# FetchContent or add_subdirectory to manage GoogleTest within your project.
 find_package(GTest REQUIRED)
 
 # Define the test executable
+# (Target name RuleEngineTests is okay, or change to MyrmidonTests if preferred)
 add_executable(RuleEngineTests
     tests/test_base_fact.cpp
-    # Add other test source files here as you create them, e.g.:
-    # tests/test_pattern.cpp
+    # Add other test source files here as you create them
 )
 
 # Link the test executable against your core library and GoogleTest
@@ -89,6 +85,4 @@ include(GoogleTest)
 gtest_discover_tests(RuleEngineTests)
 
 # --- Optional: Add test that runs the main executable (if it exists) ---
-# If you have RuleEngineApp defined above and it's runnable for a basic check:
 # add_test(NAME BasicRunTest COMMAND RuleEngineApp)
-

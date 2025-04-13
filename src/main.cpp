@@ -1,17 +1,30 @@
-// File: src/main.cpp
+// Copyright 2025 Justin Greisiger Frost
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
 #include <unordered_set>
-#include <memory> // Potentially for managing RefFact objects if needed
+#include <memory>
 
 // Include the header for our Fact system
-#include "rule_engine/base_fact.hpp"
+#include "myrmidon/base_fact.hpp"
 
 // Use the namespace for convenience
-using namespace RuleEngine;
+using namespace Myrmidon;
 
 // Define a simple struct to demonstrate RefFact
 struct MyDataObject {
@@ -21,7 +34,7 @@ struct MyDataObject {
 };
 
 int main() {
-    std::cout << "--- Rule Engine Fact Demonstration ---" << std::endl;
+    std::cout << "--- Myrmidon Rule Engine Fact Demonstration ---" << std::endl;
 
     // 1. Create a ListFact (vector of strings)
     std::vector<std::string> userList = {"Alice", "Bob", "Charlie"};
@@ -54,7 +67,6 @@ int main() {
     std::cout << std::endl;
 
     // 4. Create a ValueFact (single double and single bool)
-    // Remember: ValueFact uses a vector internally
     ValueFact<double> temperature("current_temp", {25.5});
     ValueFact<bool> systemStatus("is_online", {true});
     std::cout << "\nCreated Fact: '" << temperature.getName() << "' (ValueFact<double>)" << std::endl;
@@ -70,7 +82,6 @@ int main() {
     MyDataObject dataObject = { 999, "Sensor Data", true };
     RefFact<MyDataObject> dataRef("sensor_data_ref", &dataObject);
     std::cout << "\nCreated Fact: '" << dataRef.getName() << "' (RefFact<MyDataObject>)" << std::endl;
-    // Access the object through the pointer stored in the fact
     MyDataObject* pData = dataRef.getValues();
     if (pData) {
         std::cout << "  Ref points to object with ID: " << pData->id
@@ -80,7 +91,6 @@ int main() {
         std::cout << "  Ref points to null." << std::endl;
     }
 
-    // Example of modifying the original object - RefFact just holds the pointer
     dataObject.active = false;
     std::cout << "  Original object modified. RefFact now points to object with Active: "
               << (pData ? (pData->active ? "true" : "false") : "null") << std::endl;
