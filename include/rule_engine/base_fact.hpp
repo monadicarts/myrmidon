@@ -12,6 +12,45 @@
 
 namespace RuleEngine {
 
+    // --- C++17 compatible equality comparable check (Recursive) ---
+namespace detail {
+    // Base check: Does T define operator==?
+    template <typename T, typename = void>
+    struct has_equality_operator : std::false_type {};
+    template <typename T>
+    struct has_equality_operator<T,
+        std::void_t<decltype(std::declval<const T&>() == std::declval<const T&>())>>
+        : std::is_convertible<decltype(std::declval<const T&>() == std::declval<const T&>()), bool> {};
+
+    // Forward declaration for recursion
+    template <typename T, typename = void>
+    struct is_equality_comparable_recursive;
+
+    // Helper to check if T has value_type (like containers)
+    template <typename T, typename = void>
+    struct has_value_type : std::false_type {};
+    template <typename T>
+    struct has_value_type<T, std::void_t<typename T::value_type>> : std::true_type {};
+
+    // Main recursive trait definition
+    template <typename T, typename /* SFINAE */>
+    struct is_equality_comparable_recursive : has_equality_operator<T> {}; // Default: Just check T
+
+    // Specialization for types that have a value_type (like containers)
+    template <typename T>
+    struct is_equality_comparable_recursive<T, std::enable_if_t<has_value_type<T>::value>>
+        : std::conjunction< // Both container AND its elements must be comparable
+            has_equality_operator<T>,
+            is_equality_comparable_recursive<typename T::value_type> // Recursive check
+          > {};
+
+    // The final value template
+    template <typename T>
+    inline constexpr bool is_equality_comparable_v = is_equality_comparable_recursive<T>::value;
+
+} // namespace detail
+// --- End helper trait ---
+
 /**
  * @brief Base template class for all facts in the rule engine.
  *
@@ -77,8 +116,8 @@ public:
         if (!other) {
             return false;
         }
-        // Check if the underlying Collection type supports operator==
-        if constexpr (std::is_equality_comparable_v<Collection>) {
+        // Use the C++17 compatible helper trait
+        if constexpr (detail::is_equality_comparable_v<Collection>) { // <--- MODIFIED LINE
              return name_ == other->name_ && values_ == other->values_;
         } else {
             // If Collection is not comparable, maybe only compare names?
@@ -88,6 +127,7 @@ public:
             // Alternative: static_assert(!std::is_same_v<Collection, Collection>, "Collection type must be equality comparable for default equals");
         }
     }
+    
 
     /**
      * @brief Compares this fact with another fact represented generically.
